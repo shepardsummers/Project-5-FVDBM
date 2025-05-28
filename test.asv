@@ -11,8 +11,6 @@ n = [1  0 -1  0; ...
      0  1  0 -1
     ];
 
-dt = 0.1;
-
 f = [1.67; 0.43; 0.42; 0.4; 0.42; 0.11; 0.1; 0.1; 0.11];
 f_n = [1.63 1.67 1.55 1.66; ...
        0.61 0.42 0.77 0.50; ...
@@ -42,6 +40,7 @@ for a = 1:4
                     erm(i) = f_n(i,a);
                 end
             end
+            guh(:,a) = erm.*ksi'*n(:,a)*L(a);
         case 2
             for i = 1:9
                 if erm(i) > 0
@@ -52,9 +51,11 @@ for a = 1:4
                     dwn(i) = f(i);
                 end
             end
-            erm = upp + (dwn - upp).*(1/2 - abs(erm)*dt/(2*L(a)));
+            
+            guh(:,a) = erm.*ksi'*n(:,a)*L(a);
     end
-    guh(:,a) = erm.*ksi'*n(:,a)*L(a);
+    
+    
 end
 
 out = sum(guh, 2);

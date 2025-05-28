@@ -7,6 +7,7 @@ ksi = [0  1  0 -1  0  1 -1 -1  1; ...
       ];
 
 L = [0.8, 1.2, 0.8, 1.2];
+d = [1.2, 0.8, 1.2, 0.8];
 n = [1  0 -1  0; ...
      0  1  0 -1
     ];
@@ -52,7 +53,7 @@ for a = 1:4
                     dwn(i) = f(i);
                 end
             end
-            erm = upp + (dwn - upp).*(1/2 - abs(erm)*dt/(2*L(a)));
+            erm = upp + (dwn - upp).*(1/2 - abs(erm)*dt/(2*d(a)));
     end
     guh(:,a) = erm.*ksi'*n(:,a)*L(a);
 end

@@ -1,6 +1,6 @@
 clear, clc;
 
-order = 2;
+order = 1;
 
 ksi = [0  1  0 -1  0  1 -1 -1  1; ...
        0  0  1  0 -1  1  1 -1 -1
@@ -26,6 +26,7 @@ f_n = [1.63 1.67 1.55 1.66; ...
        0.16 0.11 0.20 0.13
       ];
 
+tic;
 guh = zeros(9,4);
 guh2 = guh;
 erm = zeros(9,1);
@@ -58,4 +59,17 @@ for a = 1:4
     guh(:,a) = erm.*ksi'*n(:,a)*L(a);
 end
 
-out = sum(guh, 2);
+flux1 = sum(guh, 2);
+time1 = toc;
+
+tic;
+    kdn = ksi'*n;
+
+    f_t = (max(kdn, 0)~=0).*f + (min(kdn, 0)~=0).*f_n;
+
+    flux2 = sum(f_t.*(ksi'*n).*L, 2);
+time2 = toc;
+
+tic;
+    flux3 = flux_int(n,L,f,f_n,ksi);
+time3 = toc;

@@ -4,15 +4,17 @@ clear, clc;
 % Domain Related
 N_nd_x = 100; % num of x nodes
 N_nd_y = N_nd_x; % num of y nodes
-L = 1; % total length
-H = 1; % total height
+L = 100; % total length
+H = 100; % total height
 N_cv_x = N_nd_x - 1; % number of x cells
 N_cv_y = N_nd_y - 1; % number of y cells
 d_x = L/N_cv_x; % dist between x nodes
 d_y = H/N_cv_y; % dist between y nodes
 A=d_x*d_y;
-d_t = 0.5;
+d_t = 0.1;
 Len = [d_y,d_x,d_y,d_x];
+
+f_ept = zeros(9,1);
 
 n = [1  0 -1  0; ...
      0  1  0 -1]; % normals (CCW starting from East)
@@ -54,7 +56,7 @@ f_cv_neq = f_cv_new; % Non equilibrium cells
 
 flux = zeros(9,N_cv_y,N_cv_x);
 %% Timer
-timer = 1;
+timer = 3000;
 
 %% Solving
 tic
@@ -179,44 +181,81 @@ for t = 1:timer
         for i = 1:N_cv_x
             if j == 1 % Top
                 if i == 1 % Top left
-                    f_3 = f_nd(:,1,1) - f_cv(:,j,i);
-                    f_2 = f_nd(:,1,1) - f_cv(:,j,i);
-                    f_n = [f_cv(:,j,i+1), f_2, f_3, f_cv(:,j+1,i)];
+                    % f_e = f_nd(:,1,1) - f_cv(:,j,i);
+                    % f_e2 = f_nd(:,1,1) - f_cv(:,j,i);
+                    % f_n = [f_cv(:,j,i+1), f_ept, f_ept, f_cv(:,j+1,i)];
+                    % flux(:,j,i) = flux_crn(n,Len,f_cv(:,j,i),f_n,ksi,f_e,2,f_e2,3);
+
+                    f_g1 = (f_nd(:,1,1) + f_nd(:,1+1,1)) - f_cv(:,j,i); % left
+                    f_g2 = (f_nd(:,1,1) + f_nd(:,1,1+1)) - f_cv(:,j,i); % top
+                    f_n = [f_cv(:,j,i+1), f_g2, f_g1, f_cv(:,j+1,i)];
                     flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 elseif i == N_cv_x % Top right
-                    f_2 = f_nd(:,1,end) - f_cv(:,j,i);
-                    f_1 = f_nd(:,1,end) - f_cv(:,j,i);
-                    f_n = [f_1, f_2, f_cv(:,j,i-1), f_cv(:,j+1,i)];
+                    % f_e = f_nd(:,1,end) - f_cv(:,j,i);
+                    % f_e2 = f_nd(:,1,end) - f_cv(:,j,i);
+                    % f_n = [f_ept, f_ept, f_cv(:,j,i-1), f_cv(:,j+1,i)];
+                    % flux(:,j,i) = flux_crn(n,Len,f_cv(:,j,i),f_n,ksi,f_e,2,f_e2,1);
+
+                    f_g1 = (f_nd(:,1,end) + f_nd(:,1+1,end)) - f_cv(:,j,i); % right
+                    f_g2 = (f_nd(:,1,end) + f_nd(:,1,end-1)) - f_cv(:,j,i); % top
+                    f_n = [f_g1, f_g2, f_cv(:,j,i-1), f_cv(:,j+1,i)];
                     flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 else % Other top
-                    f_2 = f_nd(:,1,i-1) - f_cv(:,j,i);
-                    f_n = [f_cv(:,j,i+1), f_2, f_cv(:,j,i-1), f_cv(:,j+1,i)];
+                    % f_e = f_nd(:,1,i-1) - f_cv(:,j,i);
+                    % f_n = [f_cv(:,j,i+1), f_ept, f_cv(:,j,i-1), f_cv(:,j+1,i)];
+                    % flux(:,j,i) = flux_edge(n,L,f_cv(:,j,i),f_n,ksi,f_e,2);
+
+                    f_g = (f_nd(:,1,i) + f_nd(:,1,i+1)) - f_cv(:,j,i);
+                    f_n = [f_cv(:,j,i+1), f_g, f_cv(:,j,i-1), f_cv(:,j+1,i)];
                     flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 end
             elseif j == N_cv_y % Bottom
                 if i == 1 % Bottom left
-                    f_4 = f_nd(:,end,1) - f_cv(:,j,i);
-                    f_3 = f_nd(:,end,1) - f_cv(:,j,i);
-                    f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_3, f_4];
+                    % f_e = f_nd(:,end,1) - f_cv(:,j,i);
+                    % f_e2 = f_nd(:,end,1) - f_cv(:,j,i);
+                    % f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_ept, f_ept];
+                    % flux(:,j,i) = flux_crn(n,Len,f_cv(:,j,i),f_n,ksi,f_e,4,f_e2,3);
+
+                    f_g1 = (f_nd(:,end,1) + f_nd(:,end-1,1)) - f_cv(:,j,i); % left
+                    f_g2 = (f_nd(:,end,1) + f_nd(:,end,1+1)) - f_cv(:,j,i); % bottom
+                    f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_g1, f_g2];
                     flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 elseif i == N_cv_x % Bottom right
-                    f_4 = f_nd(:,end,end) - f_cv(:,j,i);
-                    f_1 = f_nd(:,end,end) - f_cv(:,j,i);
-                    f_n = [f_1, f_cv(:,j-1,i), f_cv(:,j,i-1), f_4];
+                    % f_e = f_nd(:,end,end) - f_cv(:,j,i);
+                    % f_e2 = f_nd(:,end,end) - f_cv(:,j,i);
+                    % f_n = [f_ept, f_cv(:,j-1,i), f_cv(:,j,i-1), f_ept];
+                    % flux(:,j,i) = flux_crn(n,Len,f_cv(:,j,i),f_n,ksi,f_e,4,f_e2,1);
+
+                    f_g1 = (f_nd(:,end,end) + f_nd(:,end-1,end)) - f_cv(:,j,i); % right
+                    f_g2 = (f_nd(:,end,end) + f_nd(:,end,end-1)) - f_cv(:,j,i); % bottom
+                    f_n = [f_g1, f_cv(:,j-1,i), f_cv(:,j,i-1), f_g2];
                     flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 else % Other bottom
-                    f_4 = f_nd(:,end,i-1) - f_cv(:,j,i);
-                    f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_cv(:,j,i-1), f_4];
+                    % f_e = f_nd(:,end,i-1) - f_cv(:,j,i);
+                    % f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_cv(:,j,i-1), f_ept];
+                    % flux(:,j,i) = flux_edge(n,L,f_cv(:,j,i),f_n,ksi,f_e,4);
+
+                    f_g = (f_nd(:,end,i) + f_nd(:,end,i+1)) - f_cv(:,j,i);
+                    f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_cv(:,j,i-1), f_g];
                     flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 end
             elseif i == 1 % Left
-                f_3 = f_nd(:,j-1,1) - f_cv(:,j,i);
-                f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_3, f_cv(:,j+1,i)];
+                % f_e = f_nd(:,j-1,1) - f_cv(:,j,i);
+                % f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_ept, f_cv(:,j+1,i)];
+                % flux(:,j,i) = flux_edge(n,L,f_cv(:,j,i),f_n,ksi,f_e,3);
+
+                f_g = (f_nd(:,j,1) + f_nd(:,j+1,1)) - f_cv(:,j,i);
+                f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_g, f_cv(:,j+1,i)];
                 flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
             elseif i == N_cv_x % Right 
-                f_1 = f_nd(:,j-1,end) - f_cv(:,j,i);
-                f_n = [f_1, f_cv(:,j-1,i), f_cv(:,j,i-1), f_cv(:,j+1,i)];
+                % f_e = f_nd(:,j-1,end) - f_cv(:,j,i);
+                % f_n = [f_ept, f_cv(:,j-1,i), f_cv(:,j,i-1), f_cv(:,j+1,i)];
+                % flux(:,j,i) = flux_edge(n,L,f_cv(:,j,i),f_n,ksi,f_e,1);
+
+                f_g = (f_nd(:,j,end) + f_nd(:,j+1,end)) - f_cv(:,j,i);
+                f_n = [f_g, f_cv(:,j-1,i), f_cv(:,j,i-1), f_cv(:,j+1,i)];
                 flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
+                
             else % Interior
                 f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_cv(:,j,i-1), f_cv(:,j+1,i)];
                 flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
@@ -228,12 +267,13 @@ for t = 1:timer
     % Rho, U calculation
     [Rho_cv, U_cv] = rhoNu(f_cv, ksi);
     % f_eq calculation
-    f_cv_eq_old = f_cv_eq;
+    %f_cv_eq_old = f_cv_eq;
     f_cv_eq = eqm_d2q9(Rho_cv, U_cv, ksi, w);
 
-    % BGK Collision and Update
-    f_cv_eq = 2*f_cv_eq - f_cv_eq_old;
-    f_cv = Tau/(Tau + d_t)*f_cv + d_t/(Tau + d_t)*f_cv_eq - (Tau * d_t)/(Tau + d_t)*flux/A;
+    % 
+    %f_cv_eq = 2*f_cv_eq - f_cv_eq_old;
+    %f_cv = Tau/(Tau + d_t)*f_cv + d_t/(Tau + d_t)*f_cv_eq - (Tau * d_t)/(Tau + d_t)*flux/A;
+    f_cv = ((Tau - d_t)/Tau)*f_cv + (d_t/Tau)*f_cv_eq - d_t*flux/A;
 
     [guh, res_list(t)] = res(Rho_old, Rho_cv, min_error);
     
@@ -249,28 +289,39 @@ load Ghia_Re100.mat
 figure
 quiver(flipud(squeeze(U_cv(1,:,:))),flipud(squeeze(U_cv(2,:,:))),10)
 axis equal tight
+title("Quiver")
 
 figure
 contourf(flipud(squeeze(Rho_cv)),30)
 axis equal tight
+title("Density")
+
+figure
+contourf(flipud(squeeze(sum(U_cv.^2))),30)
+axis equal tight
+title("Velocity Mag")
+
 % 
-% mid = N_x/2;
-% Vertical_Sample = U(1, :, mid)/U_top;
-% Horizontal_Sample = U(2, mid, :)/U_top;
+mid = round(N_cv_x/2);
+Vertical_Sample = U_cv(1, :, mid)/U_top;
+Horizontal_Sample = U_cv(2, mid, :)/U_top;
 % 
 % %u2_Ghia = [1 0.48223 0.46120 0.45992 0.46036 0.33556 0.20087 0.08183 -0.03039 -0.07404 -0.22855 -0.33050 -0.40435 -0.43643 -0.42901 -0.41165 0.00000 ];
 % %v2_Ghia = [0.00000 -0.49774 -0.55069 -0.55408 -0.52876 -0.41442 -0.36214 -0.30018 0.00945 0.27280 0.28066 0.35368 0.42951 0.43648 0.43329 0.42447 0.00000];
 % 
-% figure
-% plot(squeeze(Vertical_Sample), flip((1:L)/L), "black", flip(u_Ghia), flip(y_Ghia))
-% title("Vertical Sample (U)")
-% xlabel("u")
-% ylabel("y")
-% figure
-% plot((1:L)/L, squeeze(Horizontal_Sample), "black", flip(x_Ghia), flip(v_Ghia));
-% title("Horizontal Sample (V)")
-% xlabel("x")
-% ylabel("v")
+
+L = N_cv_x;
+
+figure
+plot(squeeze(Vertical_Sample), flip((1:L)/L), "black", flip(u_Ghia), flip(y_Ghia))
+title("Vertical Sample (U)")
+xlabel("u")
+ylabel("y")
+figure
+plot((1:L)/L, squeeze(Horizontal_Sample), "black", flip(x_Ghia), flip(v_Ghia));
+title("Horizontal Sample (V)")
+xlabel("x")
+ylabel("v")
 % 
 % figure
 % u = flip(squeeze(U(1, :, :)));

@@ -1,9 +1,11 @@
 #include <iostream>
 #include <cmath>
+#include "fnct.h"
 
 using namespace std;
 
 int main() {
-    cout << "Hello World";
+    int sum = erm(10,2);
+    cout << sum;
     return 0;
 }

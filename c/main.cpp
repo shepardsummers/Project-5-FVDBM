@@ -64,7 +64,7 @@ int main() {
     //out_mat2D(guh, 2, 2);
     //out_mat2D(tr033(&mate[0][0], 5, 2), 2, 5);
     //out_mat2D(&ksi[0][0], 2, 9);
-    write_mat("res.dat", guh, 2, 2);
+    write_mat("output/res.dat", guh, 2, 2);
     return 0;
 }
 

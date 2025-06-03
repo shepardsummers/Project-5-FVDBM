@@ -48,6 +48,16 @@ double* tr033(double* mat, int rows, int cols) {
     return transposed;
 }
 
+const double* tr033(const double* mat, int rows, int cols) {
+    double* transposed = new double[rows * cols];
+    for (int r = 0; r < rows; ++r) {
+        for (int c = 0; c < cols; ++c) {
+            transposed[c * rows + r] = mat[r * cols + c];
+        }
+    }
+    return transposed;
+}
+
 void emult_mat2D(double* mat_out, double* mat1, double* mat2, int size) {
     int i = 0;
     for (; i + 4 <= size; i += 4) {
@@ -123,4 +133,43 @@ void fill_mat2D(double* p_mat, int row, int col, double val) {
     for (; k < size; ++k) {
         p_mat[k] = val;
     }
+}
+
+double* p_mult_mat2D(double* p_mat1, double* p_mat2, int row1, int col1, int page, int row2, int col2) {
+    if (col1 != page) {
+        std::cerr << "Incompatible matrix dimensions for multiplication.\n";
+        return nullptr;
+    }
+
+    double* out = new double[col1*row2*col2]();
+
+    for (int j = 0; j < row2; ++j) {
+        for (int i = 0; i < col2; ++i) {
+
+            for (int j1 = 0; j1 < row1; ++j1) {
+                for (int p = 0; p < page; ++p) {
+                    __m256d sum = _mm256_setzero_pd();
+                    int k = 0;
+                    for(; k <= col1 - 4; k += 4) {
+                        __m256d vec1 = _mm256_loadu_pd(&p_mat1[j1 * col1 + k]);
+                        __m256d vec2 = _mm256_loadu_pd(&p_mat2[p * col1 + k]);
+                        sum = _mm256_fmadd_pd(vec1, vec2, sum); // fused multiply-add
+                        
+                    }
+                    // Horizontal sum of AVX register
+                    double temp[4];
+                    _mm256_storeu_pd(temp, sum);
+                    out[j1 + row1*(j*col2 + i)] = temp[0] + temp[1] + temp[2] + temp[3];
+                    // Handle remaining elements
+                    for (; k < col1; ++k) {
+                        out[j1 + row1*(j*col2 + i)] += p_mat1[j1 * col1 + k] * p_mat2[p * col1+ k];
+                    }
+
+                    std::cout << "out[" << p << "][" << j << "][" << i << "] = " << out[j1 + row1*(j*col2 + i)] << "\n";
+                }
+            }
+
+        }
+    }
+    return out;
 }

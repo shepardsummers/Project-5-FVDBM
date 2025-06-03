@@ -11,6 +11,7 @@
 double* mult_mat2D_brute(double* mat1, double* mat2, int row1, int col1, int row2, int col2);
 
 double* tr033(double* mat, int rows, int cols);
+const double* tr033(const double* mat, int rows, int cols);
 
 /*
 * Element-wise multiplies two 2D matricies with the same size
@@ -55,5 +56,7 @@ void out_mat2D(double* p_mat, int row, int col);
 void out_mat2D(const double* p_mat, int row, int col);
 
 void fill_mat2D(double* p_mat, int row, int col, double val);
+
+double* p_mult_mat2D(double* p_mat1, double* p_mat2, int row1, int col1, int page, int row2, int col2);
 
 #endif

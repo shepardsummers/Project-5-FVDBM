@@ -41,6 +41,7 @@ int main() {
     // Initializing arrays
     const int f_emp[9] = {0}; // Empty pdf
     double Rho_nd[N_nd_y][N_nd_x]; // Density at nodes
+    fill_mat2D(&Rho_nd[0][0], N_nd_y, N_nd_x, rho_init);
     //fill_n(Rho_nd, N_nd_y*N_nd_x, rho_init);
     double Rho_cv[N_cv_y][N_cv_x]; // Density in cells
     //fill_n(Rho_cv, N_cv_y*N_cv_x, rho_init);
@@ -64,7 +65,7 @@ int main() {
     //out_mat2D(guh, 2, 2);
     //out_mat2D(tr033(&mate[0][0], 5, 2), 2, 5);
     //out_mat2D(&ksi[0][0], 2, 9);
-    write_mat("output/res.dat", guh, 2, 2);
+    //write_mat("output/rho.dat", &Rho_nd[0][0], N_nd_y, N_nd_x);
     return 0;
 }
 
@@ -82,9 +83,10 @@ void write_mat(const string& filename, double* mat, int rows, int cols) {
         return;
     }
 
-    for (int j = 0; j < rows; j++) {
-        for (int i = 0; i < cols; i++) {
-            out << mat[j * cols + i];
+    for (int j = 0; j < rows; ++j) {
+        for (int i = 0; i < cols; ++i) {
+            // << fixed <-- will fix it to do decimals and not scientific notation
+            out  << setprecision(15) << mat[j*cols + i];
             if (i < cols - 1)
                 out << " ";  // Space-separated values
         }

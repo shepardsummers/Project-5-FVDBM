@@ -44,7 +44,7 @@ void scale_mat2D(double* p_mat, int size, double val);
 * @param col Number of columns
 * @param row Number of rows
 */
-void out_mat2D(double* p_mat, int col, int row);
+void out_mat2D(double* p_mat, int row, int col);
 
 /*
 * Outputs the data stored in a 2D array to the terminal
@@ -52,6 +52,8 @@ void out_mat2D(double* p_mat, int col, int row);
 * @param col Number of columns
 * @param row Number of rows
 */
-void out_mat2D(const double* p_mat, int col, int row);
+void out_mat2D(const double* p_mat, int row, int col);
+
+void fill_mat2D(double* p_mat, int row, int col, double val);
 
 #endif

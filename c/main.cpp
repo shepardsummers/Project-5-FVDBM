@@ -157,6 +157,8 @@ void write_mat(const string& filename, double* mat, int pages, int rows, int col
 
 double* eqm_d2q9(double* p_Rho, double* p_U, double* p_ksi, double* p_w, int row, int col) {
     
+    // TODO: cleanup and make readable, fix _b and _a functions to be under one designation
+
     double* p_ksiU = p_mult_mat2D(p_ksi, p_U, 9, 2, 2, row, col);
     double* p_out = p_cmult_mat2D(p_ksiU, 9, row, col, 3.0);
     p_out = p_cadd_mat2D(p_out, 9, row, col, 1.0);
@@ -165,9 +167,12 @@ double* eqm_d2q9(double* p_Rho, double* p_U, double* p_ksi, double* p_w, int row
     p_out = p_eadd_mat2D(p_out, p_out2, 9, row, col);
     double* p_out3 = p_sum_mat2D(p_emult_mat2D(p_U, p_U, 2, row, col), 2, row, col);
     p_out3 = p_cmult_mat2D(p_out3, 1, row, col, (-3.0/2.0));
-    
-    p_out = p_eadd_mat2D_b(p_out, p_out3, 9, row, col);
-    p_out = p_emult_mat2D_a(p_emult_mat2D_b(p_out, p_Rho, 9, row, col), p_w, 9, row, col);
+    p_out = p_emult_mat2D_a(p_emult_mat2D_b(p_eadd_mat2D_b(p_out, p_out3, 9, row, col), p_Rho, 9, row, col), p_w, 9, row, col);
+
+    delete[] p_out2;
+    delete[] p_out3;
+
+    write_mat("output/test.dat", p_out, 9, row, col);
 
     return p_out;
 };

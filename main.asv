@@ -4,14 +4,14 @@ clear, clc;
 % Domain Related
 N_nd_x = 100; % num of x nodes
 N_nd_y = N_nd_x; % num of y nodes
-L = N_nd_x-1; % total length
-H = N_nd_y-1; % total height
+L = 100; % total length
+H = 100; % total height
 N_cv_x = N_nd_x - 1; % number of x cells
 N_cv_y = N_nd_y - 1; % number of y cells
 d_x = L/N_cv_x; % dist between x nodes
 d_y = H/N_cv_y; % dist between y nodes
 A=d_x*d_y;
-d_t = 0.4;
+d_t = 0.1;
 Len = [d_y,d_x,d_y,d_x];
 d = [d_x,d_y,d_x,d_y];
 
@@ -57,7 +57,7 @@ f_cv_neq = f_cv_new; % Non equilibrium cells
 
 flux = zeros(9,N_cv_y,N_cv_x);
 %% Timer
-timer = 20000;
+timer = 10000;
 
 %% Solving
 tic
@@ -189,10 +189,8 @@ for t = 1:timer
 
                     f_g1 = (f_nd(:,1,1) + f_nd(:,1+1,1)) - f_cv(:,j,i); % left
                     f_g2 = (f_nd(:,1,1) + f_nd(:,1,1+1)) - f_cv(:,j,i); % top
-                    f_n = [f_cv(:,1,1+1), f_g2, f_g1, f_cv(:,1+1,1)];
-                    
-                    %flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
-                    %flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
+                    f_n = [f_cv(:,j,i+1), f_g2, f_g1, f_cv(:,j+1,i)];
+                    flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 elseif i == N_cv_x % Top right
                     % f_e = f_nd(:,1,end) - f_cv(:,j,i);
                     % f_e2 = f_nd(:,1,end) - f_cv(:,j,i);
@@ -202,8 +200,7 @@ for t = 1:timer
                     f_g1 = (f_nd(:,1,end) + f_nd(:,1+1,end)) - f_cv(:,j,i); % right
                     f_g2 = (f_nd(:,1,end) + f_nd(:,1,end-1)) - f_cv(:,j,i); % top
                     f_n = [f_g1, f_g2, f_cv(:,j,i-1), f_cv(:,j+1,i)];
-                    %flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
-                    %flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
+                    flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 else % Other top
                     % f_e = f_nd(:,1,i-1) - f_cv(:,j,i);
                     % f_n = [f_cv(:,j,i+1), f_ept, f_cv(:,j,i-1), f_cv(:,j+1,i)];
@@ -211,8 +208,7 @@ for t = 1:timer
 
                     f_g = (f_nd(:,1,i) + f_nd(:,1,i+1)) - f_cv(:,j,i);
                     f_n = [f_cv(:,j,i+1), f_g, f_cv(:,j,i-1), f_cv(:,j+1,i)];
-                    %flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
-                    %flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
+                    flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 end
             elseif j == N_cv_y % Bottom
                 if i == 1 % Bottom left
@@ -224,8 +220,7 @@ for t = 1:timer
                     f_g1 = (f_nd(:,end,1) + f_nd(:,end-1,1)) - f_cv(:,j,i); % left
                     f_g2 = (f_nd(:,end,1) + f_nd(:,end,1+1)) - f_cv(:,j,i); % bottom
                     f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_g1, f_g2];
-                    %flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
-                    %flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
+                    flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 elseif i == N_cv_x % Bottom right
                     % f_e = f_nd(:,end,end) - f_cv(:,j,i);
                     % f_e2 = f_nd(:,end,end) - f_cv(:,j,i);
@@ -235,8 +230,7 @@ for t = 1:timer
                     f_g1 = (f_nd(:,end,end) + f_nd(:,end-1,end)) - f_cv(:,j,i); % right
                     f_g2 = (f_nd(:,end,end) + f_nd(:,end,end-1)) - f_cv(:,j,i); % bottom
                     f_n = [f_g1, f_cv(:,j-1,i), f_cv(:,j,i-1), f_g2];
-                    %flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
-                    %flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
+                    flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 else % Other bottom
                     % f_e = f_nd(:,end,i-1) - f_cv(:,j,i);
                     % f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_cv(:,j,i-1), f_ept];
@@ -244,8 +238,7 @@ for t = 1:timer
 
                     f_g = (f_nd(:,end,i) + f_nd(:,end,i+1)) - f_cv(:,j,i);
                     f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_cv(:,j,i-1), f_g];
-                    %flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
-                    %flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
+                    flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
                 end
             elseif i == 1 % Left
                 % f_e = f_nd(:,j-1,1) - f_cv(:,j,i);
@@ -254,7 +247,7 @@ for t = 1:timer
 
                 f_g = (f_nd(:,j,1) + f_nd(:,j+1,1)) - f_cv(:,j,i);
                 f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_g, f_cv(:,j+1,i)];
-
+                flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
             elseif i == N_cv_x % Right 
                 % f_e = f_nd(:,j-1,end) - f_cv(:,j,i);
                 % f_n = [f_ept, f_cv(:,j-1,i), f_cv(:,j,i-1), f_cv(:,j+1,i)];
@@ -262,16 +255,14 @@ for t = 1:timer
 
                 f_g = (f_nd(:,j,end) + f_nd(:,j+1,end)) - f_cv(:,j,i);
                 f_n = [f_g, f_cv(:,j-1,i), f_cv(:,j,i-1), f_cv(:,j+1,i)];
-                %flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
-                %flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
+                % flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
+                flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
                 
             else % Interior
                 f_n = [f_cv(:,j,i+1), f_cv(:,j-1,i), f_cv(:,j,i-1), f_cv(:,j+1,i)];
-                %flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
-                %flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
+                % flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
+                flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
             end
-            %flux(:,j,i) = flux_int(n,Len,f_cv(:,j,i),f_n,ksi);
-            flux(:,j,i) = flux_int2(n,Len,f_cv(:,j,i),f_n,ksi,d_t,d);
         end
     end
     % Collision

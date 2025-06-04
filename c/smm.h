@@ -59,4 +59,20 @@ void fill_mat2D(double* p_mat, int row, int col, double val);
 
 double* p_mult_mat2D(double* p_mat1, double* p_mat2, int row1, int col1, int page, int row2, int col2);
 
+double* p_emult_mat2D(double* p_mat1, double* p_mat2, int page, int row, int col);
+
+double* p_cmult_mat2D(double* p_mat, int page, int row, int col, double val);
+
+double* p_cadd_mat2D(double* p_mat, int page, int row, int col, double val);
+
+double* p_sum_mat2D(double* p_mat, int page, int row, int col);
+
+double* p_emult_mat2D_a(double* p_mat1, double* p_mat2, int page, int row, int col);
+
+double* p_eadd_mat2D(double* p_mat1, double* p_mat2, int page, int row, int col);
+
+double* p_eadd_mat2D_b(double* p_mat1, double* p_mat2, int page, int row, int col);
+
+double* p_emult_mat2D_b(double* p_mat1, double* p_mat2, int page, int row, int col);
+
 #endif

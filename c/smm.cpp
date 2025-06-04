@@ -141,35 +141,127 @@ double* p_mult_mat2D(double* p_mat1, double* p_mat2, int row1, int col1, int pag
         return nullptr;
     }
 
-    double* out = new double[col1*row2*col2]();
+    // TODO: VECTORIZE
 
+    double* out = new double[row1*row2*col2]();
+    
     for (int j = 0; j < row2; ++j) {
         for (int i = 0; i < col2; ++i) {
-
-            for (int j1 = 0; j1 < row1; ++j1) {
+            for (int l = 0; l < row1; ++l) {
                 for (int p = 0; p < page; ++p) {
-                    __m256d sum = _mm256_setzero_pd();
-                    int k = 0;
-                    for(; k <= col1 - 4; k += 4) {
-                        __m256d vec1 = _mm256_loadu_pd(&p_mat1[j1 * col1 + k]);
-                        __m256d vec2 = _mm256_loadu_pd(&p_mat2[p * col1 + k]);
-                        sum = _mm256_fmadd_pd(vec1, vec2, sum); // fused multiply-add
-                        
-                    }
-                    // Horizontal sum of AVX register
-                    double temp[4];
-                    _mm256_storeu_pd(temp, sum);
-                    out[j1 + row1*(j*col2 + i)] = temp[0] + temp[1] + temp[2] + temp[3];
-                    // Handle remaining elements
-                    for (; k < col1; ++k) {
-                        out[j1 + row1*(j*col2 + i)] += p_mat1[j1 * col1 + k] * p_mat2[p * col1+ k];
-                    }
-
-                    std::cout << "out[" << p << "][" << j << "][" << i << "] = " << out[j1 + row1*(j*col2 + i)] << "\n";
+                    //std::cout << "out[" << l << "][" << j << "][" << i << "]{" << i + (l*row2 + j)*col2 << "} = " << p_mat1[l*col1 + p] << " * " << p_mat2[i + (p*row2 + j)*col2] << std::endl;
+                    out[i + (l*row2 + j)*col2]  += p_mat1[l*col1 + p]*p_mat2[i + (p*row2 + j)*col2];
+                    //p + (j*col2 + i)*row2
                 }
             }
-
         }
     }
+    return out;
+}
+
+double* p_emult_mat2D(double* p_mat1, double* p_mat2, int page, int row, int col) {
+    
+    double* out = new double[page*row*col]();
+
+    for (int p = 0; p < page; ++p) {
+        for (int j = 0; j < row; ++j) {
+            for (int i = 0; i < col; ++i) {
+                out[i + (p*row + j)*col] = p_mat1[i + (p*row + j)*col]*p_mat2[i + (p*row + j)*col];
+            }
+        }
+    }
+
+    return out;
+}
+
+double* p_eadd_mat2D(double* p_mat1, double* p_mat2, int page, int row, int col) {
+    
+    double* out = new double[page*row*col]();
+
+    for (int p = 0; p < page; ++p) {
+        for (int j = 0; j < row; ++j) {
+            for (int i = 0; i < col; ++i) {
+                out[i + (p*row + j)*col] = p_mat1[i + (p*row + j)*col] + p_mat2[i + (p*row + j)*col];
+            }
+        }
+    }
+
+    return out;
+}
+
+double* p_sum_mat2D(double* p_mat, int page, int row, int col) {
+
+    double* out = new double[row*col]();
+    
+    for (int j = 0; j < row; ++j) {
+        for (int i = 0; i < col; ++i) {
+            for (int p = 0; p < page; ++p) {
+                out[i + j*col]  += p_mat[i + (p*row + j)*col];
+            }
+        }
+    }
+    return out;
+}
+
+double* p_cmult_mat2D(double* p_mat, int page, int row, int col, double val) {
+    int size = page*row*col;
+    double* out = new double[size]();
+    for (int i = 0; i < size; ++i) {
+        out[i] = p_mat[i]*val;
+    }
+    return out;
+}
+
+double* p_cadd_mat2D(double* p_mat, int page, int row, int col, double val) {
+    int size = page*row*col;
+    double* out = new double[size]();
+    for (int i = 0; i < size; ++i) {
+        out[i] = p_mat[i] + val;
+    }
+    return out;
+}
+
+double* p_emult_mat2D_a(double* p_mat1, double* p_mat2, int page, int row, int col) {
+    
+    double* out = new double[page*row*col]();
+
+    for (int p = 0; p < page; ++p) {
+        for (int j = 0; j < row; ++j) {
+            for (int i = 0; i < col; ++i) {
+                out[i + (p*row + j)*col] = p_mat1[i + (p*row + j)*col]*p_mat2[p];
+            }
+        }
+    }
+
+    return out;
+}
+
+double* p_eadd_mat2D_b(double* p_mat1, double* p_mat2, int page, int row, int col) {
+    
+    double* out = new double[page*row*col]();
+
+    for (int p = 0; p < page; ++p) {
+        for (int j = 0; j < row; ++j) {
+            for (int i = 0; i < col; ++i) {
+                out[i + (p*row + j)*col] = p_mat1[i + (p*row + j)*col] + p_mat2[i + j*col];
+            }
+        }
+    }
+
+    return out;
+}
+
+double* p_emult_mat2D_b(double* p_mat1, double* p_mat2, int page, int row, int col) {
+    
+    double* out = new double[page*row*col]();
+
+    for (int p = 0; p < page; ++p) {
+        for (int j = 0; j < row; ++j) {
+            for (int i = 0; i < col; ++i) {
+                out[i + (p*row + j)*col] = p_mat1[i + (p*row + j)*col]*p_mat2[i + j*col];
+            }
+        }
+    }
+
     return out;
 }
